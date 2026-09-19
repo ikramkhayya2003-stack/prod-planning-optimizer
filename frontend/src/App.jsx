@@ -218,15 +218,15 @@ export default function App() {
         />
 
         <Route
-  path="/gantt"
-  element={
-    <GanttPage
-      planning={planning}
-      runId={runId}
-      onPlanningUpdated={setPlanning}
-    />
-  }
-/>
+          path="/gantt"
+          element={
+            <GanttPage
+              planning={planning}
+              runId={runId}
+              onPlanningUpdated={setPlanning}
+            />
+          }
+        />
 
         <Route
           path="/machines"

@@ -13,7 +13,7 @@ dist/
 **/dist/
 build/
 **/build/
-production_optimizer_section3_COMPLETE/uploads/
+backend/uploads/
 *.pyc
 *.pyo
 *.log

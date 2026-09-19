@@ -83,7 +83,7 @@ export async function explainPlanningOperation(runId, operationId) {
   if (!operationId) throw new Error("operationId is required.");
 
   const response = await api.get(
-    `/planning/${encodeURIComponent(runId)}/operations/${operationId}/explain`,
+    `/planning/${encodeURIComponent(runId)}/operations/${encodeURIComponent(operationId)}/explain`,
   );
 
   return response.data;
@@ -124,7 +124,7 @@ export async function updatePlanningOperation(
   }
 
   const response = await api.put(
-    `/planning/${encodeURIComponent(runId)}/operations/${operationId}`,
+    `/planning/${encodeURIComponent(runId)}/operations/${encodeURIComponent(operationId)}`,
     payload,
   );
 

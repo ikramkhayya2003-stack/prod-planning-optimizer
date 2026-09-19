@@ -5,7 +5,7 @@
 Open PowerShell in the backend folder:
 
 ```powershell
-cd C:\path\to\production_optimizer_section3_COMPLETE
+cd C:\path\to\prod-planning-optimizer\backend
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r .\requirements.txt
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -24,7 +24,7 @@ http://127.0.0.1:8000/docs
 Open a second PowerShell:
 
 ```powershell
-cd C:\path\to\production_optimizer_frontend_v3
+cd C:\path\to\prod-planning-optimizer\frontend
 npm install
 npm run dev
 ```

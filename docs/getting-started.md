@@ -1,10 +1,10 @@
 # Production Optimizer — clean startup
 
 ## 1. PostgreSQL
-Create a database named `production_optimizer` and make sure the credentials in `production_optimizer_section3_COMPLETE/.env` are correct.
+Create a database named `production_optimizer` and make sure the credentials in `backend/.env` are correct.
 
 ## 2. Python
-Use a clean Python 3.14 environment (the bundled Windows OR-Tools binaries are CPython 3.14). From the backend folder:
+Use a clean Python environment. From the `backend` folder:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -15,7 +15,7 @@ python -m pip install -r requirements.txt
 Do not reuse the old `.venv` shipped in previous archives; virtual environments are OS/Python-version specific.
 
 ## 3. First clean import
-Run `RESET_AND_IMPORT.bat`. This clears old optimization runs, planning results, scenarios, simulated breakdowns and master data, then imports `production_optimizer_dataset_v2.xlsx`.
+Run `backend/RESET_AND_IMPORT.bat`. This clears old optimization runs, planning results, scenarios, simulated breakdowns and master data, then imports the bundled Excel dataset.
 
 ## 4. Start backend
 Run `START_BACKEND.bat`. API: `http://127.0.0.1:8000`, docs: `http://127.0.0.1:8000/docs`.

@@ -17,9 +17,19 @@ import StatusBadge from "../components/StatusBadge";
 import ExplainPlanPanel from "../components/ExplainPlanPanel";
 
 import {
-  updatePlanningOperation,
   getPlanning,
+  updatePlanningOperation,
 } from "../api";
+
+function getPlanningRows(response) {
+  if (Array.isArray(response)) return response;
+
+  for (const key of ["planning", "data", "results"]) {
+    if (Array.isArray(response?.[key])) return response[key];
+  }
+
+  return [];
+}
 
 export default function GanttPage({
   planning = [],
@@ -34,39 +44,9 @@ export default function GanttPage({
   const [zoom, setZoom] = useState(1);
   const [explainOperation, setExplainOperation] = useState(null);
 
-  // ============================================================
-  // NORMALISER LE PLANNING
-  // ============================================================
-
-
   const planningRows = useMemo(() => {
-    if (Array.isArray(planning)) {
-      return planning;
-    }
-
-    if (planning && Array.isArray(planning.planning)) {
-      return planning.planning;
-    }
-
-    if (planning && Array.isArray(planning.data)) {
-      return planning.data;
-    }
-
-    if (planning && Array.isArray(planning.results)) {
-      return planning.results;
-    }
-
-    console.warn(
-      "GanttPage: unexpected planning format:",
-      planning,
-    );
-
-    return [];
+    return getPlanningRows(planning);
   }, [planning]);
-
-  // ============================================================
-  // MACHINES
-  // ============================================================
 
   const machines = useMemo(
     () => [
@@ -80,10 +60,6 @@ export default function GanttPage({
     ],
     [planningRows],
   );
-
-  // ============================================================
-  // STATISTIQUES
-  // ============================================================
 
   const stats = useMemo(() => {
     const rows = planningRows.filter((row) => {
@@ -130,25 +106,9 @@ export default function GanttPage({
         (row) => Number(row.delay_hours || 0) > 0,
       ).length,
     };
-  }, [
-    planningRows,
-    machineFilter,
-    riskFilter,
-    search,
-  ]);
-
-  // ============================================================
-  // MANUAL MOVE
-  // ============================================================
+  }, [planningRows, machineFilter, riskFilter, search]);
 
   async function onMove(task, machine) {
-    console.log("======================================");
-    console.log("GANTT MANUAL MOVE");
-    console.log("task:", task);
-    console.log("target machine:", machine);
-    console.log("runId:", runId);
-    console.log("======================================");
-
     if (!runId) {
       setMessage(
         "No optimization run selected. Please run an optimization first.",
@@ -157,11 +117,6 @@ export default function GanttPage({
     }
 
     if (!task?.id) {
-      console.error(
-        "Gantt move rejected: operation has no ID.",
-        task,
-      );
-
       setMessage(
         "This operation has no database ID. Refresh the planning.",
       );
@@ -171,33 +126,18 @@ export default function GanttPage({
     const startMin = Number(task.start_min);
     const endMin = Number(task.end_min);
 
-    if (
-      !Number.isFinite(startMin) ||
-      !Number.isFinite(endMin)
-    ) {
-      setMessage(
-        "Invalid operation time.",
-      );
+    if (!Number.isFinite(startMin) || !Number.isFinite(endMin)) {
+      setMessage("Invalid operation time.");
       return;
     }
 
     if (endMin <= startMin) {
-      setMessage(
-        "Invalid operation duration.",
-      );
+      setMessage("Invalid operation duration.");
       return;
     }
 
     try {
-      setMessage(
-        `Validating move of ${
-          task.order_id || "operation"
-        } → ${machine}...`,
-      );
-
-      // ========================================================
-      // ENVOI AU BACKEND
-      // ========================================================
+      setMessage(`Validating move of ${task.order_id || "operation"} → ${machine}...`);
 
       const result = await updatePlanningOperation(
         runId,
@@ -209,15 +149,6 @@ export default function GanttPage({
         },
       );
 
-      console.log(
-        "Backend move response:",
-        result,
-      );
-
-      // ========================================================
-      // MOVE VALID
-      // ========================================================
-
       if (result?.valid === true) {
         setMessage(
           `✓ ${
@@ -225,50 +156,11 @@ export default function GanttPage({
           } successfully moved to ${machine}.`,
         );
 
-        // ======================================================
-        // RECHARGER LE PLANNING DEPUIS POSTGRESQL
-        // ======================================================
-
-        const refreshedPlanning =
-          await getPlanning(runId);
-
-        console.log(
-          "Refreshed planning:",
-          refreshedPlanning,
-        );
-
-        // Normalisation du nouveau planning
-        let rows = [];
-
-        if (Array.isArray(refreshedPlanning)) {
-          rows = refreshedPlanning;
-        } else if (
-          refreshedPlanning &&
-          Array.isArray(refreshedPlanning.planning)
-        ) {
-          rows = refreshedPlanning.planning;
-        } else if (
-          refreshedPlanning &&
-          Array.isArray(refreshedPlanning.data)
-        ) {
-          rows = refreshedPlanning.data;
-        } else if (
-          refreshedPlanning &&
-          Array.isArray(refreshedPlanning.results)
-        ) {
-          rows = refreshedPlanning.results;
-        }
-
-        if (onPlanningUpdated) {
-          onPlanningUpdated(rows);
-        }
+        const refreshedPlanning = await getPlanning(runId);
+        onPlanningUpdated?.(getPlanningRows(refreshedPlanning));
 
         return;
       }
-
-      // ========================================================
-      // MOVE REJECTED
-      // ========================================================
 
       const reasons =
         Array.isArray(result?.validation_errors) &&
@@ -276,10 +168,7 @@ export default function GanttPage({
           ? result.validation_errors.join(" | ")
           : "The operation cannot be moved.";
 
-      setMessage(
-        `✕ Move rejected: ${reasons}`,
-      );
-
+      setMessage(`✕ Move rejected: ${reasons}`);
     } catch (error) {
       console.error(
         "Gantt operation update failed:",
@@ -571,4 +460,3 @@ export default function GanttPage({
 function MoveIcon() {
   return <Edit3 size={15} />;
 }
-

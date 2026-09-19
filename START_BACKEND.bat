@@ -1,7 +1,7 @@
 @echo off
 setlocal
 set "PROJECT_DIR=%~dp0"
-set "BACKEND_DIR=%~dp0production_optimizer_section3_COMPLETE"
+set "BACKEND_DIR=%~dp0backend"
 if not exist "%PROJECT_DIR%\.venv\Scripts\python.exe" (
   echo [ERROR] Backend virtual environment not found:
   echo %PROJECT_DIR%\.venv

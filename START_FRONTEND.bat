@@ -1,6 +1,6 @@
 @echo off
 setlocal
-cd /d "%~dp0production_optimizer_frontend_v3"
+cd /d "%~dp0frontend"
 if not exist "node_modules" (
   echo Installing frontend dependencies...
   call npm ci
